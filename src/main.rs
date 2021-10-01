@@ -1,11 +1,12 @@
 use std::convert::Infallible;
-use std::net::SocketAddr;
-use std::sync::Arc;
+use std::env;
+use std::error::Error;
 use std::io::Write;
+use std::net::{IpAddr, SocketAddr};
+use std::sync::Arc;
 
-use similar::{ChangeTag, TextDiff};
 use askama::Template;
-use chrono::{SubsecRound, DateTime, Utc};
+use chrono::{DateTime, SubsecRound, Utc};
 use clap::{App, Arg};
 use comrak::plugins::syntect::SyntectAdapter;
 use comrak::{
@@ -17,6 +18,7 @@ use hyper::service::{make_service_fn, service_fn};
 use hyper::Method;
 use hyper::{header, Body, Response};
 use hyper::{Request, Server, StatusCode};
+use similar::{ChangeTag, TextDiff};
 use tokio::sync::RwLock;
 use tokio_postgres::NoTls;
 use tracing::{event, Level};
@@ -420,6 +422,8 @@ impl Handler {
         let decoded = decode_percents(req.uri().path())?;
         let route = Route::router(&decoded)?.to_owned();
 
+        println!("{}", route);
+
         match route {
             Route::Root => {
                 let res = Response::builder()
@@ -445,11 +449,21 @@ fn main() {
 }
 
 async fn main2() -> DynResult<()> {
+    let db_connection_string =
+        env::var("DB_CONNECTION_STRING").expect("Missing env var DB_CONNECTION_STRING");
+    event!(Level::INFO, "Started");
+
     let mut my_subscriber_builder = FmtSubscriber::builder();
 
     let app = App::new(CARGO_PKG_NAME)
         .version(CARGO_PKG_VERSION)
         .author("Stacey Ell <software@e.staceyell.com>")
+        .arg(
+            Arg::with_name("host")
+                .long("host")
+                .help("Hostname to bind the server to")
+                .default_value("127.0.0.1"),
+        )
         .arg(
             Arg::with_name("v")
                 .short("v")
@@ -458,6 +472,12 @@ async fn main2() -> DynResult<()> {
         );
 
     let matches = app.get_matches();
+
+    let host: IpAddr = matches
+        .value_of("host")
+        .expect("missing host arg")
+        .parse()
+        .expect("invalid host arg");
 
     let verbosity = matches.occurrences_of("v");
     let should_print_test_logging = 4 < verbosity;
@@ -477,7 +497,7 @@ async fn main2() -> DynResult<()> {
         print_test_logging();
     }
 
-    let db_uri = "postgresql://quassel@localhost/quassel";
+    let db_uri = &db_connection_string;
 
     let (db_client, connection) = tokio_postgres::connect(db_uri, NoTls).await?;
     tokio::spawn(async move {
@@ -490,7 +510,7 @@ async fn main2() -> DynResult<()> {
         inner: Arc::new(RwLock::new(HandlerInner { db: db_client })),
     };
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from((host, 3000));
 
     // And a MakeService to handle each connection...
     let make_service = make_service_fn(move |conn: &AddrStream| {
