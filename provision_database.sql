@@ -1,7 +1,6 @@
 
-DROP TABLE document_history CASCADE;
-DROP TABLE document CASCADE;
-
+DROP TABLE IF EXISTS document_history CASCADE;
+DROP TABLE IF EXISTS document CASCADE;
 
 CREATE TABLE document (
     id BIGSERIAL PRIMARY KEY,
@@ -22,4 +21,3 @@ ALTER TABLE document_history ADD CONSTRAINT fk_document_history_document FOREIGN
 CREATE INDEX document_history_document_id ON document_history(document_id);
 
 ALTER TABLE document ADD CONSTRAINT fk_document_document_history FOREIGN KEY (current_revision_id) REFERENCES document_history (id);
-
