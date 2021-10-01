@@ -422,8 +422,6 @@ impl Handler {
         let decoded = decode_percents(req.uri().path())?;
         let route = Route::router(&decoded)?.to_owned();
 
-        println!("{}", route);
-
         match route {
             Route::Root => {
                 let res = Response::builder()
@@ -465,6 +463,12 @@ async fn main2() -> DynResult<()> {
                 .default_value("127.0.0.1"),
         )
         .arg(
+            Arg::with_name("port")
+                .long("port")
+                .help("Port to bind the server to")
+                .default_value("3000"),
+        )
+        .arg(
             Arg::with_name("v")
                 .short("v")
                 .multiple(true)
@@ -478,6 +482,11 @@ async fn main2() -> DynResult<()> {
         .expect("missing host arg")
         .parse()
         .expect("invalid host arg");
+    let port: u16 = matches
+        .value_of("port")
+        .expect("missing port arg")
+        .parse()
+        .expect("invalid port arg");
 
     let verbosity = matches.occurrences_of("v");
     let should_print_test_logging = 4 < verbosity;
@@ -510,7 +519,7 @@ async fn main2() -> DynResult<()> {
         inner: Arc::new(RwLock::new(HandlerInner { db: db_client })),
     };
 
-    let addr = SocketAddr::from((host, 3000));
+    let addr = SocketAddr::from((host, port));
 
     // And a MakeService to handle each connection...
     let make_service = make_service_fn(move |conn: &AddrStream| {
