@@ -27,5 +27,9 @@ tracing = "0.1.9"
 tracing-subscriber = "0.1.5"
 similar = "2.0.0"
 
+[[bin]]
+name = "wiki"
+path = "src/main.rs"
+
 # internal
 # linker-connector = { path = "../../tonic/linker-connector" }
