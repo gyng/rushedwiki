@@ -1,0 +1,18 @@
+<h1>{{ page_title|e }}</h1>
+<table>
+    <tr>
+        <th>Version ID</th>
+        <th>Edited At</th>
+        <th>Edited By</th>
+        <th>View</th>
+    </tr>
+    {% let rv = self.route_view().to_string() %}
+    {% for dh in history_records %}
+    <tr>
+      <td>{{ dh.document_history_id|e }}</td>
+      <td>{{ dh.created_at|e }}</td>
+      <td>{{ dh.created_by|e }}</td>
+      <td><a href="{{ rv }}/rev/{{ dh.document_history_id|e }}">View</a></td>
+    </tr>
+    {% endfor %}
+</table>

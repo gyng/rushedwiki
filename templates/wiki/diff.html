@@ -1,0 +1,4 @@
+<h1>{{ page_title|e }}</h1>
+<p>Comparing <a href="{{ first.history_link }}">{{ first.document_history_id }} ({{ first.created_at }}) by {{ first.created_by }}</a> and <a href="{{ second.history_link }}">{{ second.document_history_id }} ({{ second.created_at }}) by {{ second.created_by }}</a><p>
+
+{{ rendered|safe }}

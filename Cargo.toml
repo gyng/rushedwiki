@@ -1,0 +1,31 @@
+[package]
+name = "wiki"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# external
+askama = "0.10.5"
+async-std  = "1.10.0"
+async-stream = "0.3.2"
+chrono = "0.4"
+clap = { version = "2.33.1", default-features = false }
+comrak = "0.12.1"
+futures = "0.3"
+futures-util = "0.3.1"
+hyper = { version = "0.14", features = ["http1", "http2", "server", "runtime", "tcp", "stream"] }
+percent-encoding = "2.1.0"
+rustls = "0.19.1"
+rustls-acme = "0.1.6"
+tokio = { version = "1.12", features = ["full"] }
+tokio-postgres = { version = "0.7.3", features = ["runtime", "with-chrono-0_4"] }
+tokio-postgres-rustls = "0.8.0"
+tokio-rustls = "0.22.0"
+tracing = "0.1.9"
+tracing-subscriber = "0.1.5"
+similar = "2.0.0"
+
+# internal
+# linker-connector = { path = "../../tonic/linker-connector" }
